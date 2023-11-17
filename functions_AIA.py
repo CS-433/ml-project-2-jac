@@ -25,48 +25,49 @@ def load_data():
 
     return data
 
-def get_image(data):
-    
-    dates=data["date"]
-    
-    for i,date in enumerate(dates):
 
+def get_image(data):
+    data=data.reset_index()
+    dates=data["date"]
+
+    for i,date in enumerate(dates):
         start_time = Time(date, scale='utc', format='isot') #“CCYY-MM-DDThh:mm:ss[.sss. . . ]”, Coordinated Universal Time (UTC), 
 
-        bottom_x=data["basepoint_X"][i]  # I am not sure this is right
-        bottom_y=data["basepoint_Y"][i]   # same
+        bottom_x=data["basepoint_X"][i]  # ew position
+        bottom_y=data["basepoint_Y"][i]   # ns position
 
         duration=data["duration"][i]
+        
+        bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
+        top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
 
-        bottom_left = SkyCoord((bottom_x-200)*u.arcsec, (bottom_y-200)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-        top_right = SkyCoord((bottom_x+200)*u.arcsec, (bottom_y+200)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
+        jsoc_email = "adrien.joliat@epfl.ch"
 
-        jsoc_email = "julie.charlet@epfl.ch"
-
-        cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=True)
-
-        print(cutout)
-
+        cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
         query = Fido.search(
-            a.Time(start_time , start_time + duration*u.min), #duration is in min
+            a.Time(start_time , start_time + 240*u.s), #duration is in min
             a.Wavelength(304*u.angstrom),
-            a.Sample(2*u.min), #one image /12 s --> 5images per min
+            a.Sample(24*u.s), #one image /12 s --> 5images per min
             a.jsoc.Series.aia_lev1_euv_12s,
             a.jsoc.Notify(jsoc_email),
-            a.jsoc.Segment.image,
+            #a.jsoc.Segment.image,
             cutout,
         )
-        files = Fido.fetch(query)
+        files = Fido.fetch(query,overwrite=True)
         files.sort()
-        
+
     return files
 
+def array_file(files): 
+    # Initialize the 3D matrix
+    sequence_array = np.zeros((500, 500, len(files)))
+    # "files" is (class <parfive>) and contains N <HDUList> objects (where N is the nb of images in the sequence) 
+    for i in range(len(files)):
+        with fits.open(files[i]) as f:
+            array=f[1].data
+            sequence_array[:,:,i] = array
 
-def array_file(file): #for the moment only designed for one file
-    with fits.open(file[0]) as f:
-        array=f[1].data
-        image_array=np.array(array)
-    return image_array
+    return sequence_array
 
 
 def plot(files):
@@ -75,4 +76,3 @@ def plot(files):
     fig = plt.figure()
     ax = fig.add_subplot(projection=sequence.maps[0])
     ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
-    return ani

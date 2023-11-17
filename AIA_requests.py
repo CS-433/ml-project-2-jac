@@ -17,98 +17,40 @@ from functions_AIA import *
 
 import torch
 
-"""
-============================================================================================
-1st line of data 
 
-date: 2011-01-20T09:15:44.000000
-basepoint_x: -226.577125	
-basepoint_y: -956.964375
+# Load the csv data containing the events
+data = load_data()
 
-2011-01-20T23:49:20.000000
--143.625000
-386.404000
-============================================================================================
-"""
-
-start_time = Time('2011-01-20T09:15:44.000000', scale='utc', format='isot') 
-bottom_left = SkyCoord(-426*u.arcsec, -1156*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-top_right =SkyCoord(-26*u.arcsec, -756*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-
-cutout = a.jsoc.Cutout(bottom_left, top_right=top_right, tracking=True)
-
-#print(os.environ)
-jsoc_email = "julie.charlet@epfl.ch"
-
-query = Fido.search(
-    a.Time(start_time - 10*u.min, start_time + 10*u.min),
-    a.Wavelength(304*u.angstrom),
-    a.Sample(2*u.min),
-    a.jsoc.Series.aia_lev1_euv_12s,
-    a.jsoc.Notify(jsoc_email),
-    a.jsoc.Segment.image,
-    cutout,
-)
-print(query)
-
-files = Fido.fetch(query)
-files.sort()
-
-sequence = sunpy.map.Map(files, sequence=True)
-
-fig = plt.figure()
-ax = fig.add_subplot(projection=sequence.maps[0])
-ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
-
-plt.show()
-"""
-============================================================================================
-Importing more than one line at a time using functions
-============================================================================================
+# Get the number of event and initialize the output array
+events_list = [data[data.index==i] for i in range(1,3)] # Will become the full list of event when we actually download everything
+#N_events = data.shape[0] : for when we download everything
+N_events = len(events_list)
+data_array = np.zeros((N_events, 500, 500, 11))   
+# last dim is the number of images per sequence => needs to be consistent with the end_time and sample time in the get_image function
 
 
-data=load_data()
-i = 0
-row_data = data.iloc[i]
+# This loop goes over each data line of the .csv file
+for i, event in enumerate(events_list):
+    files = get_image(event) # selects data line i
+    # "files" is (class <parfive>) and contains N <HDUList> objects (where N is the nb of images in the sequence) 
+    # that we open as "f". The attribute f.data returns a numpy array in our case, bc the data is an image.
+    # sequence_array is a 3D array of shape (500, 500, N) which contains all the pixel values for one line of data (~ 1 event)
+    sequence_array = array_file(files)
 
-files = get_image(data) # get the images for the line i
+    # Add the 3D array into the 4D array with all the data
+    data_array[i,:,:,:] = sequence_array
 
-sequence = sunpy.map.Map(files, sequence=True)
+    # Plotting the numpy arrays to check that we get the images => need improvement to chech the image's quality
 
-fig = plt.figure()
-ax = fig.add_subplot(projection=sequence.maps[0])
-ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
+    for j in range(len(files)):
+        img = sequence_array[:,:,j]
+        plt.imshow(img, cmap='hot', interpolation='nearest')
+        plt.show()
 
-plt.show()
-
-
-for i in range(2):
-    files = get_image(data[data.index==i]) # get the images for the line i
-    image_array = array_file(files)
-
-    sequence = sunpy.map.Map(files, sequence=True)
-
-    sequence_array = sequence.as_array()
-
-    print(sequence_array)
-    fig = plt.figure()
-    ax = fig.add_subplot(projection=sequence.maps[0])
-    ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
-
-    plt.show()
+# Check the size of final array
+print(data_array.shape)
 
 
-
-
-files = get_image(data[data.index==0]) #first line of the data
-image_array = array_file(files)
-
-sequence = sunpy.map.Map(files, sequence=True)
-
-fig = plt.figure()
-ax = fig.add_subplot(projection=sequence.maps[0])
-ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
-
-plt.show()
-
-"""
+# Find a way to export the array to an external file the reuse in the model. Possibilities to look at:
+# .npy format and np.save function
+# HPF5 format (good with large amount of data)
