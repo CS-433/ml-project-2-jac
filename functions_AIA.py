@@ -26,7 +26,7 @@ def load_data():
     return data
 
 
-def get_image(data):
+def get_image(data, num_image):
     data=data.reset_index()
     dates=data["date"]
 
@@ -35,8 +35,6 @@ def get_image(data):
 
         bottom_x=data["basepoint_X"][i]  # ew position
         bottom_y=data["basepoint_Y"][i]   # ns position
-
-        duration=data["duration"][i]
         
         bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
         top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
@@ -45,12 +43,12 @@ def get_image(data):
 
         cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
         query = Fido.search(
-            a.Time(start_time , start_time + 240*u.s), #duration is in min
+            a.Time(start_time , start_time + (num_image-1)*24*u.s), #duration is in min, we stop for n images
             a.Wavelength(304*u.angstrom),
-            a.Sample(24*u.s), #one image /12 s --> 5images per min
+            a.Sample(24*u.s), #one image /24 s 
             a.jsoc.Series.aia_lev1_euv_12s,
             a.jsoc.Notify(jsoc_email),
-            #a.jsoc.Segment.image,
+            a.jsoc.Segment.image,
             cutout,
         )
         files = Fido.fetch(query,overwrite=True)
@@ -70,9 +68,10 @@ def array_file(files):
     return sequence_array
 
 
-def plot(files):
-    sequence = sunpy.map.Map(files, sequence=True)
+def plot_array(array):
+    plt.figure()
+    vmin, vmax=np.percentile(array, [1, 99.9])
+    norm=ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
+    plt.imshow(array[:,:,0], norm=norm, cmap="sdoaia304")
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection=sequence.maps[0])
-    ani = sequence.plot(axes=ax, norm=ImageNormalize(vmin=0, vmax=5e3, stretch=SqrtStretch()))
+    plt.show()
