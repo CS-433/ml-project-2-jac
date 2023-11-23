@@ -39,7 +39,7 @@ def get_image(data, num_image):
         bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
         top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
 
-        jsoc_email = "adrien.joliat@epfl.ch"
+        jsoc_email = "julie.charlet@epfl.ch"
 
         cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
         query = Fido.search(
@@ -59,10 +59,12 @@ def get_image(data, num_image):
 def array_file(files): 
     # Initialize the 3D matrix
     sequence_array = np.zeros((500, 500, len(files)))
+    downsampling_layer = torch.nn.MaxPool2d(3, stride=3)
     # "files" is (class <parfive>) and contains N <HDUList> objects (where N is the nb of images in the sequence) 
     for i in range(len(files)):
         with fits.open(files[i]) as f:
-            array=f[1].data
+            array = (f[1].data).astype(np.float32)
+            array = downsampling_layer(array)
             sequence_array[:,:,i] = array
 
     return sequence_array
@@ -72,6 +74,6 @@ def plot_array(array):
     plt.figure()
     vmin, vmax=np.percentile(array, [1, 99.9])
     norm=ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
-    plt.imshow(array[:,:,0], norm=norm, cmap="sdoaia304")
+    plt.imshow(array, norm=norm, cmap="sdoaia304")
 
     plt.show()
