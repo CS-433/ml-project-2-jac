@@ -20,13 +20,12 @@ import torch
 
 # Load the csv data containing the events
 data = load_data()
-num_images=30
 # Get the number of event and initialize the output array
 events_list = [data[data.index==i] for i in range(1,2)] # Will become the full list of event when we actually download everything
 #N_events = data.shape[0] : for when we download everything
 N_events = len(events_list)
-num_images = 10
-data_array = np.zeros((N_events, 500, 500, num_images))   
+num_images = 30
+# data_array = np.zeros((N_events, 166, 166, num_images))   
 # last dim is the number of images per sequence => needs to be consistent with the end_time and sample time in the get_image function
 
 
@@ -44,7 +43,7 @@ for i, event in enumerate(events_list):
     #data_array[i,:,:,:] = sequence_array
 
     # Plotting the numpy arrays to check that we get the images => need improvement to chech the image's quality
-"""
+    """
     for j in range(len(files)):
         img = sequence_array[:,:,j]
         plt.imshow(img, cmap='hot', interpolation='nearest')
