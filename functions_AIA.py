@@ -25,24 +25,35 @@ def load_data():
 
     return data
 
+def load_data_nojet():
+    data=pd.read_csv("./No_jet_df.csv")
+    return data
 
-def get_image(data, num_image):
-    data=data.reset_index()
-    dates=data["date"]
 
-    for i,date in enumerate(dates):
-        start_time = Time(date, scale='utc', format='isot') #“CCYY-MM-DDThh:mm:ss[.sss. . . ]”, Coordinated Universal Time (UTC), 
+def get_images(data, num_image, jsoc_email):
+    """
+    Inputs:
+    data:       1xD, an line of data from dataframe (will be iterate in the main code)
+    num_image:  scalar, number of images wanted in a sequence
+    jsoc_email: string, verified mail address from the user
 
-        bottom_x=data["basepoint_X"][i]  # ew position
-        bottom_y=data["basepoint_Y"][i]   # ns position
+    
+    Return:
+    files:      sunpy content, Files extracted from the Jsoc database 
+    """
+
+    date=data["date"]
+
+    start_time = Time(date, scale='utc', format='isot') #“CCYY-MM-DDThh:mm:ss[.sss. . . ]”, Coordinated Universal Time (UTC), 
+
+    bottom_x=data["basepoint_X"]  # ew position
+    bottom_y=data["basepoint_Y"]   # ns position
         
-        bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-        top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
+    bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
+    top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
 
-        jsoc_email = "carlos.colladocapell@epfl.ch"
-
-        cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
-        query = Fido.search(
+    cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
+    query = Fido.search(
             a.Time(start_time , start_time + (num_image-1)*24*u.s), #duration is in seconds, we stop for n images
             a.Wavelength(304*u.angstrom),
             a.Sample(24*u.s), #one image /24 s 
@@ -51,21 +62,23 @@ def get_image(data, num_image):
             a.jsoc.Segment.image,
             cutout,
         )
-        files = Fido.fetch(query,overwrite=True)
-        files.sort()
+    
+    files = Fido.fetch(query,overwrite=True)
+    files.sort()
 
     return files
 
 def array_file(files): 
     # Initialize the 3D matrix
-    sequence_array = np.zeros((500, 500, len(files)))
-    #downsampling_layer = torch.nn.MaxPool2d(3, stride=3)
+    sequence_array = np.zeros((166, 166, len(files)))
+    downsampling_layer = torch.nn.MaxPool2d(3, stride=3)
     # "files" is (class <parfive>) and contains N <HDUList> objects (where N is the nb of images in the sequence) 
     for i in range(len(files)):
         with fits.open(files[i]) as f:
             array = (f[1].data).astype(np.float32)
-            #array = downsampling_layer(array)
-            sequence_array[:,:,i] = array
+            array = torch.from_numpy(array).unsqueeze(0).unsqueeze(0)
+            array = downsampling_layer(array)
+            sequence_array[:,:,i] = array.numpy()
 
     return sequence_array
 

@@ -17,12 +17,16 @@ from functions_AIA import *
 
 import torch
 
+#######################
+#Working version on Adrien_messy.ipynb
+#######################
+
 
 # Load the csv data containing the events
 data = load_data()
 # Get the number of event and initialize the output array
 #events_list = [data[data.index==i] for i in range(1,2)] # Will become the full list of event when we actually download everything
-events_list = data.iloc[:5] # Will become the full list of event when we actually download everything
+events_list = data.iloc[:1] # Will become the full list of event when we actually download everything
 #N_events = data.shape[0] : for when we download everything
 N_events = len(events_list)
 num_images = 30
