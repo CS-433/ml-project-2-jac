@@ -17,6 +17,10 @@ from sunpy.net import attrs as a
 
 import torch
 
+# Animations
+from matplotlib.animation import FuncAnimation
+from IPython.display import HTML
+from astropy.visualization import ImageNormalize, SqrtStretch
 
 def load_data():
     """
