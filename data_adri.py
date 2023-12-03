@@ -13,9 +13,9 @@ from astropy.visualization import ImageNormalize, SqrtStretch
 
 data1=load_data()
 num_images=30
-jsoc_email="adrien.joliat@epfl.ch"
+jsoc_email="adrien.joliat@bluewin.ch"
 
-events_list = data1.iloc[203:]
+events_list = data1.iloc[328:]
 a=0
 
 for i in events_list.index:
