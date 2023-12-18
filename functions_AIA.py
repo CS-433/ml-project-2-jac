@@ -113,30 +113,3 @@ def plot_array(array):
     plt.imshow(array, norm=norm, cmap="sdoaia304")
 
     plt.show()
-
-
-def get_image_one_date(data, num_image):
-    start_time = Time(data["date"], scale='utc', format='isot') #“CCYY-MM-DDThh:mm:ss[.sss. . . ]”, Coordinated Universal Time (UTC), 
-
-    bottom_x=data["basepoint_X"]  # ew position
-    bottom_y=data["basepoint_Y"]  # ns position
-        
-    bottom_left = SkyCoord((bottom_x-150)*u.arcsec, (bottom_y-150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-    top_right = SkyCoord((bottom_x+150)*u.arcsec, (bottom_y+150)*u.arcsec, obstime=start_time, observer="earth", frame="helioprojective")
-
-    jsoc_email = "carlos.colladocapell@epfl.ch"
-
-    cutout = a.jsoc.Cutout(bottom_left=bottom_left, top_right=top_right, tracking=False)
-    query = Fido.search(
-        a.Time(start_time , start_time + (num_image-1)*24*u.s), #duration is in seconds, we stop for n images
-        a.Wavelength(304*u.angstrom),
-        a.Sample(24*u.s), #one image /24 s 
-        a.jsoc.Series.aia_lev1_euv_12s,
-        a.jsoc.Notify(jsoc_email),
-        a.jsoc.Segment.image,
-        cutout,
-    )
-    files = Fido.fetch(query,overwrite=True)
-    files.sort()
-
-    return files
