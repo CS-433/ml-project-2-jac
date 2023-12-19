@@ -20,13 +20,13 @@ def move_random_files(source_folder, destination_folder, percentage):
         print(f"Moved {file_name} to {destination_folder}")
 
 # Specify the source and destination folders
-source_1 = "./data1"
-destination_1 = "./data1_test"
-destination_1_val = "./data1_val"
+source_1 = "../data/data_separated/data1"
+destination_1 = "../data/data_separated/data1_test"
+destination_1_val = "../data/data_separated/data1_val"
 
-source_0 = "./data0"
-destination_0 = "./data0_test"
-destination_0_val = "./data0_val"
+source_0 = "../data/data_separated/data0"
+destination_0 = "../data/data_separated/data0_test"
+destination_0_val = "../data/data_separated/data0_val"
 
 # Specify the percentage of files to move (20%)
 percentage_to_move = 0.15
@@ -48,13 +48,13 @@ move_random_files(destination_0_val, source_0, 1)
 """
 
 # Final check
-files_test1 = os.listdir("./data1_test")
-files_val1 = os.listdir("./data1_val")
-files_1 = os.listdir("./data1")
+files_test1 = os.listdir("../data/data_separated/data1_test")
+files_val1 = os.listdir("../data/data_separated/data1_val")
+files_1 = os.listdir("../data/data_separated/data1")
 
-files_test0 = os.listdir("./data0_test")
-files_val0 = os.listdir("./data0_val")
-files_0 = os.listdir("./data0")
+files_test0 = os.listdir("../data/data_separated/data0_test")
+files_val0 = os.listdir("../data/data_separated/data0_val")
+files_0 = os.listdir("../data/data_separated/data0")
 
 print(" # of files in data1_test", len(files_test1))
 print(" # of files in data1_val", len(files_val1))

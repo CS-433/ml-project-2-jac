@@ -26,7 +26,7 @@ def load_data():
     """
     Function to load the data with jets
     """
-    data=pd.read_csv("./data/Jet_clusters_3.0_2.0_paperID.csv", sep=",")
+    data=pd.read_csv("./data/events/Jet_clusters_3.0_2.0_paperID.csv", sep=",")
     data.columns=data.columns.str.strip()
     data=data.drop(columns="velocity")
 
@@ -36,7 +36,7 @@ def load_data_nojet():
     """
     Function to load the data without jets
     """
-    data=pd.read_csv("./data/No_jet_df.csv")
+    data=pd.read_csv("./data/events/No_jet_df.csv")
     return data
 
 
