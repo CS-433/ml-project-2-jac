@@ -107,3 +107,34 @@ def test(model, train_loader, criterion, device, threshold):
     val_acc = correct / total_length
 
     return val_loss, val_acc, np.array(all_preds), np.array(all_targets), np.array(all_out)
+
+def get_param(result_dict, i):
+    """
+    Gets the parameters name as strings to use as label for the plots
+
+    """
+
+    hyperparams_name = f"hyperparams_{i}"
+    hyperparams = result_dict[hyperparams_name]
+
+    lr = hyperparams[0]
+    scheduler_type = hyperparams[1]
+
+    if scheduler_type == "<class 'torch.optim.lr_scheduler.ExponentialLR'>":
+      scheduler_type = 'Exponential LR'
+
+    elif scheduler_type == "<class 'torch.optim.lr_scheduler.CosineAnnealingLR'>":
+      scheduler_type = 'Cosine annealing LR'
+
+    elif scheduler_type == "<class 'torch.optim.lr_scheduler.ReduceLROnPlateau'>":
+      scheduler_type = 'Reduce LR on plateau'
+
+    optimizer = hyperparams[2]
+
+    if optimizer == "<class 'torch.optim.sgd.SGD'>":
+      optimizer = 'SGD'
+
+    elif optimizer ==  "<class 'torch.optim.adamw.AdamW'>":
+      optimizer = 'Adam'
+
+    return lr, scheduler_type, optimizer
