@@ -2,14 +2,23 @@
 
 # Description of the github structure:
 
-- data : folder containing csv of jets events from 2011 to 2016 and csv of non jet events from HEK database
+- data : folder containing csv of jets events from 2011 to 2016, csv of non jet events from HEK database and the whole downloaded dataset of image sequencies.
 
-- data0/data0_test/data0_val/data1/data1_test/data1_val : folders containing each set of the data used for the deep learning model. 0 mean no jet and 1, a jet event.
+- data collection : folder containing a jupyter notebook that shows how the dataset was created and a python file that contain helper functions for this task.
 
-- Download_Data.ipynb : Jupyter notebook that contain the steps of creating the dataset **(group both dataset, positive/negative together)**
+- model training : folder containing a jupyter notebook that shows how the model has been implemented and trained. Also a python file with helper functions for this task.
 
-- functions_AIA.py : python file where every funcions used to download the data are stored.
+- model evaluation : folder that contains:
+  - model_analysis.ipynb : jupyter notebook that shows the result of the model
+  - helper_analysis.py : python file that contain helper functions for this task
+  - results_cv_final.json : json file that contain the results of the cross validation (18 models)
+  - 2 Best resulting models : Trained_RCNN.pth and Trained_RCNN_2.pth
+  - f1_vs_threshold.eps : result of the plot for determine threshold parameter
+  - figures : folder that contains every missclassified events as gif
 
+- try_model_with_your_data.ipynb : jupyter notebook for the ESA that will try new datas with our model to benefit from automatic classification and so, detection.
+
+- animation.gif : exemple of the event 29 containing a jet and used in our paper.
 
 
 # Libraries used in the project:
@@ -43,21 +52,13 @@ The following is a summary of the libraries and their specific modules used in t
 - **Miscellaneous**
   - Random
 
-**--> Questions ? everything in the same notebook or separate model, training and results ?, I think train/validate/test functions should be on another pyton file**
-- One file with running the test model and one file to evaluate the results of the model
-
-- result_cv_final.json : Json file containing the results of 18 different model used as cross-validation, for more details see the report.  
-
-- Trained_RCNN.pth : Our trained model with cosine optimizer, final one
-
-- Trained_RCNN_2.pth : Our trained model with exponential optimizer
 
 # Run the code
-As we don't need to recreate the dataset and will take too much time (approx 1.5 days), only run the RCNN file. The part where we train the model will also not be runned as it take around 1 hour with gpu. 
+Start with data collection then with model training and finally with the model evaluation. Take care to not run cells in red (These are explicitly noted in the notebooks) because the computationnal requirement is huge.
 
 ## Steps : 
 - Make sure to have all used libraries installed.
-- Run the RCNN.ipynb file.
+- Follow the previous steps
 
 # Timeline of the Project
 - **6-12 November**: familiarization with the project and exploration of solar physics Python libraries
