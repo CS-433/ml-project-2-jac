@@ -54,11 +54,13 @@ The following is a summary of the libraries and their specific modules used in t
 
 
 # Run the code
-Start with data collection then with model training and finally with the model evaluation. Take care to not run cells in red (These are explicitly noted in the notebooks) because the computationnal requirement is huge.
+Take care to not run cells in red (These are explicitly noted in the notebooks) because the computationnal requirement is huge.
 
 ## Steps : 
 - Make sure to have all used libraries installed.
-- Follow the previous steps
+- Start with data collection 
+- Then with model training 
+- Finally with the model evaluation. 
 
 # Timeline of the Project
 - **6-12 November**: familiarization with the project and exploration of solar physics Python libraries
