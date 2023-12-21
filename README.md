@@ -13,8 +13,7 @@
   - helper_analysis.py : python file that contain helper functions for this task
   - results_cv_final.json : json file that contain the results of the cross validation (18 models)
   - 2 Best resulting models : Trained_RCNN.pth and Trained_RCNN_2.pth
-  - f1_vs_threshold.eps : result of the plot for determine threshold parameter
-  - figures : folder that contains every missclassified events as gif
+  - figures : folder that contains every missclassified events as gif, the plots displayed in the notebook 
 
 - try_model_with_your_data.ipynb : jupyter notebook for the ESA that will try new datas with our model to benefit from automatic classification and so, detection.
 
